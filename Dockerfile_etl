@@ -1,0 +1,30 @@
+# Imagem base com Python 3.11
+FROM python:3.11-slim
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y \
+    gcc \
+    libpq-dev \
+    cron \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt .
+
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY etl/ ./etl/
+COPY etl/start_etl.sh /app/start_etl.sh
+RUN chmod +x /app/start_etl.sh
+
+RUN mkdir -p /var/log/etl
+
+RUN useradd --create-home --shell /bin/bash etl && \
+    chown -R etl:etl /app /var/log/etl
+
+USER etl
+
+# Apenas esta variável é útil manter aqui
+ENV PYTHONPATH=/app
+
+CMD ["/app/start_etl.sh"]

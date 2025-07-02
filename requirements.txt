@@ -1,0 +1,30 @@
+# Dependências principais
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+psycopg2-binary==2.9.9
+requests==2.31.0
+schedule==1.2.0
+
+# Desenvolvimento e testes
+pytest==7.4.3
+pytest-asyncio==0.21.1
+pytest-cov==4.1.0
+httpx==0.25.2
+python-dotenv==1.0.0
+uvicorn==0.24.0
+
+# Qualidade de código
+black==23.11.0
+flake8==6.1.0
+isort==5.12.0
+
+# Utilitários
+pydantic==2.5.0
+python-multipart==0.0.6
+
+# Logging e monitoramento
+structlog==23.2.0
+
+# Airflow (opcional - descomente se usar Airflow)
+# apache-airflow==2.7.3
+# apache-airflow-providers-postgres==5.7.1

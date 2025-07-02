@@ -1,0 +1,55 @@
+[flake8]
+# Configuração do Flake8 para o projeto Weather ETL API
+
+# Comprimento máximo da linha
+max-line-length = 88
+
+# Complexidade ciclomática máxima
+max-complexity = 10
+
+# Códigos de erro a ignorar
+ignore = 
+    # E203: whitespace before ':'
+    E203,
+    # W503: line break before binary operator
+    W503,
+    # E501: line too long (handled by black)
+    E501
+
+# Arquivos e diretórios a excluir
+exclude = 
+    .git,
+    __pycache__,
+    .pytest_cache,
+    .coverage,
+    htmlcov,
+    dist,
+    build,
+    *.egg-info,
+    venv,
+    env,
+    .venv,
+    .env,
+    migrations
+
+# Extensões a usar
+select = E,W,F,C
+
+# Contagem de erros
+count = True
+
+# Mostrar estatísticas
+statistics = True
+
+# Formato de saída
+format = %(path)s:%(row)d:%(col)d: %(code)s %(text)s
+
+# Configurações específicas por arquivo
+per-file-ignores =
+    # Permitir imports não utilizados em __init__.py
+    __init__.py:F401
+    # Permitir imports de módulos em conftest.py
+    conftest.py:F401,F811
+    # Permitir redefinições em testes
+    test_*.py:F811
+

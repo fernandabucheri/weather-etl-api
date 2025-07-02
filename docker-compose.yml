@@ -1,0 +1,94 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: weather_postgres
+    environment:
+      POSTGRES_DB: weather_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    ports:
+      - "5432:5432"
+    networks:
+      - weather_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d weather_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  etl:
+    build:
+      context: .
+      dockerfile: Dockerfile_etl
+    container_name: weather_etl
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: weather_db
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      OPENWEATHER_API_KEY: ${OPENWEATHER_API_KEY}
+      ETL_MODE: schedule
+      SCHEDULE_INTERVAL_MINUTES: 60
+      CITIES: "São Paulo,Rio de Janeiro,Belo Horizonte,Salvador,Fortaleza"
+      CLEANUP_DAYS: 30
+    volumes:
+      - etl_logs:/var/log/etl
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - weather_network
+    restart: unless-stopped
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile_api
+    container_name: weather_api
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: weather_db
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      API_HOST: 0.0.0.0
+      API_PORT: 8000
+      DEBUG: false
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - weather_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  adminer:
+    image: adminer:4.8.1
+    container_name: weather_adminer
+    ports:
+      - "8080:8080"
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres
+    depends_on:
+      - postgres
+    networks:
+      - weather_network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  etl_logs:
+
+networks:
+  weather_network:
